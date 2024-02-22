@@ -27,7 +27,10 @@
                 </div>
             </ItemTemplate>
         </asp:Repeater>
-
+        <div class="d-flex justify-content-center mt-3">
+            <asp:Button ID="btnPrecedente" runat="server" CssClass="btn btn-sm btnChange text-white" Text="Precedente" OnClick="btnPrecedente_Click" />
+            <asp:Button ID="btnSuccessivo" runat="server" CssClass="btn btn-sm btnChange text-white ms-2" Text="Successivo" OnClick="btnSuccessivo_Click" />
+        </div>
     </main>
 
 </asp:Content>

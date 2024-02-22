@@ -9,7 +9,23 @@ namespace BW4
 {
     public partial class _Default : Page
     {
+        private const int ProdottiPerPagina = 5;
+        private int PaginaCorrente = 1;
+
         protected void Page_Load(object sender, EventArgs e)
+        {
+            // Controlla se la pagina è stata richiamata per la prima volta o a causa di un postback
+            if (!IsPostBack)
+            {
+                // Inizializza la variabile PaginaCorrente a 1 quando la pagina è caricata per la prima volta
+                PaginaCorrente = 1;
+            }
+
+            // Carica i dati in base alla paginazione
+            CaricaDatiPagina();
+        }
+
+        protected void CaricaDatiPagina()
         {
             string connectionString = ConfigurationManager.ConnectionStrings["MyDb"].ToString();
             SqlConnection conn = new SqlConnection(connectionString);
@@ -18,7 +34,8 @@ namespace BW4
             {
                 conn.Open();
 
-                string query = "SELECT * FROM Prodotto";
+                // Modifica la query SQL in base alla paginazione
+                string query = $"SELECT * FROM Prodotto ORDER BY IDProdotto OFFSET {(PaginaCorrente - 1) * ProdottiPerPagina} ROWS FETCH NEXT {ProdottiPerPagina} ROWS ONLY";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
 
@@ -28,6 +45,7 @@ namespace BW4
 
                 while (reader.Read())
                 {
+                    // ... il codice esistente per caricare i prodotti nella lista
                     Prodotto prodotto = new Prodotto();
                     prodotto.Id = Convert.ToInt32(reader["IDProdotto"]);
                     prodotto.NomeProdotto = reader.GetString(1);
@@ -40,13 +58,33 @@ namespace BW4
 
                 Repeater1.DataSource = listaProdotti;
                 Repeater1.DataBind();
-
             }
             catch (Exception ex)
             {
-                Response.Write(ex.Message);
+                Response.Write($"Errore durante il recupero dei dati: {ex.Message}");
             }
-            finally { conn.Close(); }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        protected void btnPrecedente_Click(object sender, EventArgs e)
+        {
+            // Riduci la variabile PaginaCorrente se non è già la prima pagina
+            if (PaginaCorrente > 1)
+            {
+                PaginaCorrente--;
+                CaricaDatiPagina();
+            }
+        }
+
+        protected void btnSuccessivo_Click(object sender, EventArgs e)
+        {
+            // Incrementa la variabile PaginaCorrente se non è già l'ultima pagina
+
+            PaginaCorrente++;
+            CaricaDatiPagina();
         }
 
 
